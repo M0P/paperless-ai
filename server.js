@@ -70,6 +70,8 @@ async function scanInital() {
         const aiService = AIServiceFactory.getService();
         const analysis = await aiService.analyzeDocument(content, existingTags);
 
+        console.log('Analysis', analysis);
+
         const { tagIds, errors } = await paperlessService.processTags(analysis?.document?.tags || []);
         //const { tagIds, errors } = await paperlessService.processTags(analysis.document.tags);
         
@@ -80,7 +82,7 @@ async function scanInital() {
         let updateData = { 
           tags: tagIds,
           title: analysis?.document?.title || doc.title,
-          created: analysis.document.document_date || doc.created,
+          created: analysis?.document?.document_date || doc.created,
         };
         
         if (analysis.document.correspondent) {
