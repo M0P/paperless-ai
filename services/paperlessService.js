@@ -35,18 +35,21 @@ class PaperlessService {
     try {
       console.log('Refreshing tag cache...');
       this.tagCache.clear();
-      
-      let nextUrl = '/tags/';
-      while (nextUrl) {
-        const response = await this.client.get(nextUrl);
+      let nextPage = '/tags/';
+      let totalTags = 0;
+  
+      // Schleife durch alle Seiten der API
+      while (nextPage) {
+        const response = await this.client.get(nextPage);
         response.data.results.forEach(tag => {
           this.tagCache.set(tag.name.toLowerCase(), tag);
         });
-        nextUrl = response.data.next;
+        totalTags += response.data.results.length;
+        nextPage = response.data.next; // 'next' enthält die URL der nächsten Seite, falls vorhanden
       }
-      
+  
       this.lastTagRefresh = Date.now();
-      console.log(`Tag cache refreshed. Found ${this.tagCache.size} tags.`);
+      console.log(`Tag cache refreshed. Found ${totalTags} tags.`);
     } catch (error) {
       console.error('Error refreshing tag cache:', error.message);
       throw error;
