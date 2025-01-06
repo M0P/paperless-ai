@@ -72,8 +72,8 @@ async function scanInital() {
 
         console.log('Analysis', analysis);
 
-        const { tagIds, errors } = await paperlessService.processTags(analysis?.document?.tags || []);
-        //const { tagIds, errors } = await paperlessService.processTags(analysis.document.tags);
+        const { tagIds, errors } = await paperlessService.processTags(analysis.tags || []);
+        //const { tagIds, errors } = await paperlessService.processTags(analysis.tags);
         
         if (errors.length > 0) {
           console.warn('Some tags could not be processed:', errors);
@@ -81,23 +81,23 @@ async function scanInital() {
 
         let updateData = { 
           tags: tagIds,
-          title: analysis?.document?.title || doc.title,
-          created: analysis?.document?.document_date || doc.created,
+          title: analysis.title || doc.title,
+          created: analysis_date || doc.created,
         };
         
-        if (analysis.document.correspondent) {
+        if (analysis.correspondent) {
           try {
-            const correspondent = await paperlessService.getOrCreateCorrespondent(analysis.document.correspondent);
+            const correspondent = await paperlessService.getOrCreateCorrespondent(analysis.correspondent);
             if (correspondent) {
               updateData.correspondent = correspondent.id;
             }
           } catch (error) {
-            console.error(`Error processing correspondent "${analysis.document.correspondent}":`, error.message);
+            console.error(`Error processing correspondent "${analysis.correspondent}":`, error.message);
           }
         }
 
-        if (analysis.document.language) {
-          updateData.language = analysis.document.language;
+        if (analysis.language) {
+          updateData.language = analysis.language;
         }
 
         try {
@@ -139,7 +139,7 @@ async function scanDocuments() {
         let updateData = { 
           tags: tagIds,
           title: analysis.title || doc.title,
-          created: analysis.document_date || doc.created,
+          created: analysis_date || doc.created,
         };
         
         if (analysis.correspondent) {
