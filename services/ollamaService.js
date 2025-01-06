@@ -78,9 +78,14 @@ class OllamaService {
 
       // Try to parse the extracted JSON
       const result = JSON.parse(jsonStr);
+      
+      console.log('Result JSON:', result);
 
       // Validate and return structured data
       return {
+        title: result.title,
+        document_date: result.document_date,
+        language: result.language,
         tags: Array.isArray(result.tags) ? result.tags : [],
         correspondent: typeof result.correspondent === 'string' ? result.correspondent : null
       };
