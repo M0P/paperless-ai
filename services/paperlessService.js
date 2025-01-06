@@ -192,8 +192,26 @@ class PaperlessService {
   async getTags() {
     this.initialize();
     try {
-      const response = await this.client.get('/tags/');
-      return response.data.results;
+      let allTags = [];
+      let page = 1;
+      let hasMorePages = true;
+      
+      while (hasMorePages) {
+        const response = await this.client.get('/tags/', {
+          params: {
+            page: page,
+            page_size: 100 // Maximale Anzahl pro Seite
+          }
+        });
+        
+        allTags = allTags.concat(response.data.results);
+        
+        // Prüfe ob es weitere Seiten gibt
+        hasMorePages = response.data.next !== null;
+        page++;
+      }
+      
+      return allTags;
     } catch (error) {
       console.error('Error fetching tags:', error.message);
       return [];
