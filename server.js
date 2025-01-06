@@ -82,7 +82,7 @@ async function scanInital() {
         let updateData = { 
           tags: tagIds,
           title: analysis.title || doc.title,
-          created: analysis_date || doc.created,
+          created: analysis.document_date || doc.created,
         };
         
         if (analysis.correspondent) {
