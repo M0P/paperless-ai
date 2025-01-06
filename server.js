@@ -103,7 +103,7 @@ async function scanInital() {
         try {
           await paperlessService.updateDocument(doc.id, updateData);
           await documentModel.addProcessedDocument(doc.id, updateData.title);
-          await documentModel.addOpenAIMetrics(doc.id, analysis.metrics.promptTokens, analysis.metrics.completionTokens, analysis.metrics.totalTokens);
+          //await documentModel.addOpenAIMetrics(doc.id, analysis.metrics.promptTokens, analysis.metrics.completionTokens, analysis.metrics.totalTokens);
         } catch (error) {
           console.error(`Error processing document: ${error}`);
         }
