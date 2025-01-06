@@ -34,11 +34,17 @@ class PaperlessService {
   async refreshTagCache() {
     try {
       console.log('Refreshing tag cache...');
-      const response = await this.client.get('/tags/');
       this.tagCache.clear();
-      response.data.results.forEach(tag => {
-        this.tagCache.set(tag.name.toLowerCase(), tag);
-      });
+      
+      let nextUrl = '/tags/';
+      while (nextUrl) {
+        const response = await this.client.get(nextUrl);
+        response.data.results.forEach(tag => {
+          this.tagCache.set(tag.name.toLowerCase(), tag);
+        });
+        nextUrl = response.data.next;
+      }
+      
       this.lastTagRefresh = Date.now();
       console.log(`Tag cache refreshed. Found ${this.tagCache.size} tags.`);
     } catch (error) {
