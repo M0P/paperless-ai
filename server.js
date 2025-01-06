@@ -77,6 +77,9 @@ async function scanInital() {
           console.warn('Some tags could not be processed:', errors);
         }
 
+        console.error(analysis.document.title)
+        console.error(doc.title)
+
         let updateData = { 
           tags: tagIds,
           title: analysis.document.title || doc.title,
