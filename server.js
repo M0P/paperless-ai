@@ -70,7 +70,8 @@ async function scanInital() {
         const aiService = AIServiceFactory.getService();
         const analysis = await aiService.analyzeDocument(content, existingTags);
 
-        const { tagIds, errors } = await paperlessService.processTags(analysis.document.tags);
+        const { tagIds, errors } = await paperlessService.processTags(analysis?.document?.tags || []);
+        //const { tagIds, errors } = await paperlessService.processTags(analysis.document.tags);
         
         if (errors.length > 0) {
           console.warn('Some tags could not be processed:', errors);
