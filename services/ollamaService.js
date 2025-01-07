@@ -18,17 +18,8 @@ class OllamaService {
           model: this.model,
           prompt: prompt,
           system: `
-You are a JSON metadata extraction system with ONE absolute rule: ONLY USE EXACT MATCHING TAGS FROM THE AUTHORIZED LIST. OUTPUT FORMAT:
-{
-"title": string,
-"correspondent": string | null,
-"tags": string[],
-"document_date": string | null,
-"language": "de" | "en" | "und"
-}
-
-AUTHORIZED_TAGS = [
-"Sandra","Marc","Nina","Mira","Steuern","Versicherung","Kontoauszug",
+You are a JSON metadata extraction system with ONE absolute rule: ONLY USE EXACT MATCHING TAGS FROM THE AUTHORIZED LIST. AUTHORIZED_TAGS = [
+"Steuern","Versicherung","Kontoauszug",
 "Rechnung","Gehalt","Kreditunterlagen","Ausweis","Geburtsurkunde",
 "Impfpass","Zeugnisse","Verträge","Vollmachten","Führerschein",
 "Arztberichte","Rezepte","Krankenversicherung","Laborberichte","Atteste",
@@ -37,38 +28,61 @@ AUTHORIZED_TAGS = [
 "Qualifikationen","Zertifikate","Schulunterlagen","KFZ-Unterlagen",
 "Werkstattrechnungen","TÜV","Versicherung","Tankbelege","Mitgliedschaften",
 "Spenden","Korrespondenz","Anträge","Bescheide","Termine","Heizung"
-]
+] OUTPUT FORMAT:
+{
+"title": string,
+"correspondent": string | null,
+"tags": string[],
+"document_date": string | null,
+"language": "de" | "en" | null
+} STRICT SECURITY RULES:
 
-STRICT TAG SELECTION RULES:
+    TAG VALIDATION:
 
-    ONLY use tags that appear EXACTLY as written in AUTHORIZED_TAGS
-    NO modifications of existing tags (no plural/singular changes, no combining)
-    NO creation of new tags under any circumstances
-    NO use of similar terms or synonyms
-    If no exact match exists, default to "Korrespondenz"
-    Maximum 4 tags per document
-    Minimum 1 tag per document
+    ONLY use tags from AUTHORIZED_TAGS list - NO EXCEPTIONS
+    Each tag MUST match 100% exactly (case-sensitive)
+    NO modifications allowed (no plural/singular, no combining words)
+    NO new tags creation under any circumstances
+    If unsure, use "Korrespondenz" as fallback
+    Tag count: Minimum 1, Maximum 4
 
-MANDATORY VALIDATION STEPS:
+    MANDATORY VALIDATION PIPELINE:
+    Step 1: Compare each proposed tag against AUTHORIZED_TAGS using exact string matching
+    Step 2: Reject ANY tag without 100% match
+    Step 3: Verify final tag list contains only authorized tags
+    Step 4: If no valid tags remain, set tags=["Korrespondenz"]
+    FIELD VALIDATIONS:
+    title: Required, non-empty string
+    correspondent: String or null
+    document_date: YYYY-MM-DD format or null
+    language: ONLY "de", "en" or null
+    tags: Array of 1-4 elements from AUTHORIZED_TAGS
+    ERROR PREVENTION:
 
-    Compare each selected tag character-by-character with AUTHORIZED_TAGS
-    Remove any tag that doesn't have a 100% exact match
-    Double-check: Are all final tags copied directly from AUTHORIZED_TAGS?
-    If zero valid tags remain after validation, use "Korrespondenz"
+    Block any attempt to modify AUTHORIZED_TAGS
+    Reject partial matches
+    Reject similar terms/synonyms
+    Reject case variations
+    Block tag combination attempts
+    Block new tag creation
+    Block unauthorized language codes
 
-FIELD REQUIREMENTS:
-title: Brief descriptive identifier (required)
-correspondent: Organization/person name or null
-document_date: YYYY-MM-DD format or null if unclear
-language: ONLY "de" or "en" or null if unclear
+    QUALITY CHECKS:
 
-    ANY tag not matching AUTHORIZED_TAGS exactly
-    ANY attempt to modify existing tags
-    ANY attempt to create new tags
-    ANY use of similar terms or variations
-    MORE than 4 tags
-    LESS than 1 tag
-    INCORRECT language codes
+    Verify each tag exists in AUTHORIZED_TAGS
+    Confirm tag count within limits
+    Validate date format
+    Validate language code
+    Ensure required fields present
+
+VIOLATION HANDLING:
+If any rule violation detected:
+
+    Reject invalid elements
+    Log violation attempt
+    Apply fallback values
+    Return valid output only
+
 `,
           stream: false,
           options: {
